@@ -2,11 +2,10 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import requests
+import os  # Ajoute cette ligne tout en haut avec les autres imports
 from datetime import datetime, timedelta
 import warnings
 warnings.filterwarnings('ignore')
-
-import os  # Ajoute cette ligne tout en haut avec les autres imports
 
 # --- CONFIG TELEGRAM (Lecture automatique depuis les Secrets GitHub) ---
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
