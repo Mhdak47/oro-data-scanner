@@ -16,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- CSS PERSO (Noir & Or - Street Luxe / AK47) ---
+# --- CSS PERSO ---
 st.markdown("""
     <style>
         .main { background-color: #0a0a0a; }
@@ -25,11 +25,7 @@ st.markdown("""
         .css-1d391kg { background-color: #0a0a0a; }
         .stMetric { background-color: #1a1a1a; border-radius: 10px; padding: 10px; border: 1px solid #D4AF37; }
         .block-container { padding-top: 2rem; }
-        .stTextInput > div > div > input { background-color: #1a1a1a; color: white; border: 1px solid #D4AF37; }
-        .stSelectbox > div > div > select { background-color: #1a1a1a; color: white; border: 1px solid #D4AF37; }
         hr { border-color: #D4AF37; opacity: 0.3; }
-        .header-tag { color: #888; font-size: 14px; letter-spacing: 2px; }
-        .gold-text { color: #D4AF37; font-weight: bold; }
         .ak-quote { color: #aaa; font-style: italic; border-left: 3px solid #D4AF37; padding-left: 15px; }
     </style>
 """, unsafe_allow_html=True)
@@ -39,9 +35,8 @@ st.markdown("<h1 style='text-align: center;'>👾 ORO & DATA - QG AK47</h1>", un
 st.markdown("<p style='text-align: center; color: #888;'>Le QG du Stratège Marocain - Précision & Domination 🇲🇦</p>", unsafe_allow_html=True)
 st.divider()
 
-# --- SIDEBAR (Paramètres) ---
+# --- SIDEBAR ---
 with st.sidebar:
-    st.image("https://via.placeholder.com/150/0a0a0a/D4AF37?text=AK47+FLOW", width=150) 
     st.markdown("### 🎯 Paramètres du Stratège")
     days = st.slider("Période d'analyse (jours)", 7, 60, 30)
     threshold = st.slider("Seuil Z-Score (agressivité)", 0.3, 1.0, 0.6)
@@ -50,15 +45,15 @@ with st.sidebar:
     st.markdown("---")
     st.caption("⚡ Dernier scan: " + datetime.now().strftime("%H:%M:%S"))
 
-# --- 1. RECUPERATION DES DONNEES ---
-@st.cache_data(ttl=300)  # Cache de 5 minutes
+# --- 1. RECUPERATION DES DONNEES (CORRIGÉ AVEC GC=F) ---
+@st.cache_data(ttl=300)
 def load_data(days):
     end = datetime.now()
     start = end - timedelta(days=days)
     
     btc = yf.download('BTC-USD', start=start, end=end, progress=False)
     gold = yf.download('GLD', start=start, end=end, progress=False)
-    xau = yf.download('XAUUSD=X', start=start, end=end, progress=False)
+    xau = yf.download('GC=F', start=start, end=end, progress=False)  # <--- ICI LE CHANGEMENT
     dxy = yf.download('DX-Y.NYB', start=start, end=end, progress=False)
     
     df = pd.DataFrame()
@@ -101,7 +96,7 @@ if df is None or df.empty:
 
 last = df.iloc[-1]
 
-# --- 2. SECTION METRIQUES (TOP ROW) ---
+# --- 2. METRIQUES ---
 st.markdown("### 📡 Situation des Marchés")
 col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -122,7 +117,7 @@ with col5:
 
 st.divider()
 
-# --- 3. SIGNAL DU MOMENT (L'ALERTE CHAUDE) ---
+# --- 3. SIGNAL ---
 st.markdown("### 🚨 Alerte Stratégique du Moment")
 cond1 = last['Z_Score'] < -threshold
 cond2 = last['RSI_BTC'] < 40
@@ -144,7 +139,7 @@ with col_advice:
 
 st.divider()
 
-# --- 4. GRAPHIQUES DYNAMIQUES (PLOTLY) ---
+# --- 4. GRAPHIQUES ---
 st.markdown("### 📊 Analyse Technique Avancée")
 
 fig = make_subplots(
@@ -156,34 +151,27 @@ fig = make_subplots(
     horizontal_spacing=0.1
 )
 
-# Graph 1: BTC + MA20
 fig.add_trace(go.Scatter(x=df.index, y=df['BTC'], name='BTC', line=dict(color='#D4AF37', width=2)), row=1, col=1)
 fig.add_trace(go.Scatter(x=df.index, y=df['MA20_BTC'], name='MA20', line=dict(color='cyan', width=1, dash='dash')), row=1, col=1)
 
-# Graph 2: RSI BTC
 fig.add_trace(go.Scatter(x=df.index, y=df['RSI_BTC'], name='RSI', line=dict(color='orange', width=2)), row=2, col=1)
 fig.add_hline(y=70, line_dash="dash", line_color="red", row=2, col=1)
 fig.add_hline(y=30, line_dash="dash", line_color="green", row=2, col=1)
 
-# Graph 3: XAU
 fig.add_trace(go.Scatter(x=df.index, y=df['XAU'], name='XAUUSD', line=dict(color='gold', width=2)), row=1, col=2)
 fig.add_trace(go.Scatter(x=df.index, y=df['MA20_XAU'], name='MA20_XAU', line=dict(color='white', width=1, dash='dash')), row=1, col=2)
 
-# Graph 4: Z-Score
 fig.add_trace(go.Scatter(x=df.index, y=df['Z_Score'], name='Z-Score', line=dict(color='cyan', width=2)), row=2, col=2)
 fig.add_hline(y=threshold, line_dash="dash", line_color="red", row=2, col=2)
 fig.add_hline(y=-threshold, line_dash="dash", line_color="green", row=2, col=2)
 fig.add_hrect(y0=-threshold, y1=threshold, line_width=0, fillcolor="gray", opacity=0.15, row=2, col=2)
 
-# Graph 5: Correlations
 fig.add_trace(go.Scatter(x=df.index, y=df['Corr_BTC_GLD'], name='Corr BTC/Or', line=dict(color='#D4AF37', width=2)), row=3, col=1)
 fig.add_trace(go.Scatter(x=df.index, y=df['Corr_BTC_DXY'], name='Corr BTC/DXY', line=dict(color='red', width=2)), row=3, col=1)
 fig.add_hline(y=0, line_dash="dash", line_color="white", row=3, col=1)
 
-# Graph 6: Volume placeholder
 fig.add_trace(go.Bar(x=df.index, y=df['BTC'], name='Volume estimé', marker_color='#D4AF37', opacity=0.3), row=3, col=2)
 
-# Mise à jour du layout global (Dark Theme)
 fig.update_layout(
     template='plotly_dark',
     height=1000,
@@ -202,7 +190,7 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
 
-# --- 5. HISTORIQUE DES ALERTES & TRADE JOURNAL ---
+# --- 5. CARNET DE BORD ---
 st.markdown("### 📓 Carnet de Bord du Stratège")
 
 col_journal, col_actions = st.columns([3, 1])
@@ -217,13 +205,13 @@ with col_journal:
     }
     df_history = pd.DataFrame(data_history)
     st.dataframe(df_history, use_container_width=True, hide_index=True)
-    st.caption("📌 L'historique réel des alertes Telegram s'affichera ici automatiquement (à connecter plus tard).")
+    st.caption("📌 L'historique réel des alertes Telegram s'affichera ici automatiquement.")
 
 with col_actions:
     st.markdown("#### 🎯 Action Rapide")
     trade_result = st.selectbox("Résultat du dernier trade", ["✅ Gagnant", "❌ Perdant", "⏳ En cours"])
-    if st.button("📝 Enregistrer dans le journal"):
-        st.success("Journal mis à jour ! (Feature en construction pour lien avec bot)")
+    if st.button("📝 Enregistrer"):
+        st.success("Journal mis à jour !")
 
 # --- 6. FOOTER ---
 st.divider()
