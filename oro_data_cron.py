@@ -54,8 +54,8 @@ def get_signals():
         df_btc['RSI'] = 100 - (100 / (1 + rs))
         
         last_btc = df_btc.iloc[-1]
-        signal_btc_achat = (last_btc['Z_Score'] < -0.6) and (last_btc['RSI'] < 40) and (last_btc['BTC'] > last_btc['MA20'])
-        signal_btc_vente = (last_btc['Z_Score'] > 0.6) and (last_btc['RSI'] > 60) and (last_btc['BTC'] < last_btc['MA20'])
+        signal_btc_achat = (last_btc['Z_Score'] < -0.45) and (last_btc['RSI'] < 45) and (last_btc['BTC'] > last_btc['MA20'])
+        signal_btc_vente = (last_btc['Z_Score'] > 0.45) and (last_btc['RSI'] > 55) and (last_btc['BTC'] < last_btc['MA20'])
         btc_price = last_btc['BTC']
     else:
         signal_btc_achat = False
@@ -76,8 +76,8 @@ def get_signals():
         df_xau['RSI'] = 100 - (100 / (1 + rs_xau))
         
         last_xau = df_xau.iloc[-1]
-        signal_xau_achat = (last_xau['RSI'] < 40) and (last_xau['XAU'] > last_xau['MA20'])
-        signal_xau_vente = (last_xau['RSI'] > 60) and (last_xau['XAU'] < last_xau['MA20'])
+        signal_xau_achat = (last_xau['RSI'] < 45) and (last_xau['XAU'] > last_xau['MA20'])
+        signal_xau_vente = (last_xau['RSI'] > 55) and (last_xau['XAU'] < last_xau['MA20'])
         xau_price = last_xau['XAU']
     else:
         signal_xau_achat = False
