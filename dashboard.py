@@ -39,7 +39,7 @@ st.divider()
 with st.sidebar:
     st.markdown("### 🎯 Paramètres du Stratège")
     days = st.slider("Période d'analyse (jours)", 7, 60, 30)
-    threshold = st.slider("Seuil Z-Score (agressivité)", 0.3, 1.0, 0.6)
+    threshold = st.slider("Seuil Z-Score (agressivité)", 0.3, 1.0, 0.45)
     st.markdown("---")
     st.markdown("<p class='ak-quote'>'La domination ne s'obtient pas par la force, mais par la lecture du jeu.' - Stratège AK47</p>", unsafe_allow_html=True)
     st.markdown("---")
